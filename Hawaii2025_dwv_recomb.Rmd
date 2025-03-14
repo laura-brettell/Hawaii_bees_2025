@@ -1,0 +1,239 @@
+---
+title: "Hawaii2025_dwv_recomb_working"
+author: "Laura"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project
+
+Here I am exploring the data from Oxford Nanopore seq data from pooled bee samples collected from Hawaii in 2024/2025, we are looking at the viral lanscape, particularly DWV in Hawaii 15 years after our first study.
+
+There are 3 islands with different conditions: Oahu - treatment free, Big Island - treat for Varroa, and Kauai - no Varroa.
+
+RNA was extracted in Declan's lab with Clarissa and run across 4 libraries on the GridION
+
+These are the mapping data from mapping to a custom db with minimap2 in epitome labs. Here I will visualise coverage plots across DWV-A and DWV-B genomes to identify recombinants
+
+
+
+### install packages
+
+```{r}
+
+#if (!require("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+
+#BiocManager::install("Rsamtools")
+
+#BiocManager::install("gmoviz")
+
+library(Rsamtools) # for reading int he bam file
+#library(GenomicRanges)
+library(gmoviz) # for getCoverage
+library(ggplot2)
+library(dplyr)
+
+
+```
+
+
+## first, with just one sample
+
+### Load the data
+
+Testing with Waimanalo 1 (one I have looked at in igv and appears to show a recombinant).
+
+The folder contianing the .bam file must also contian the corresponding .bam.bai file. You don't explicitly call it but the getCoverage() command will look for and use it.
+ 
+```{r}
+
+bamfile <- "../data_downloads_GridION/LIB3/wf-metagenomics_partial/wf-metagenomics_01JJYS9V86CGXV1DGXH4PEAKS2/output/bams/Waminalo1.reference.bam"
+
+
+```
+
+
+### make plot
+
+First extract the relevant portions of the alignemnt:
+
+ "NC_004830.2" = DWV-A
+ "NC_006494.1" = DWV-B
+ 
+Then covert to data frames, combine them and plot
+
+
+```{r}
+
+# Get coverage for both virus genomes
+temp_A <- getCoverage(regions_of_interest = 'NC_004830.2', bam_file = bamfile, window_size = 20) # window_size can be used down to 1 (calculating the coverage for each individual base, not here, in 20 base blocks - this is better and I may do that next, it is just more computationally heavy and takes longer)
+temp_B <- getCoverage(regions_of_interest = 'NC_006494.1', bam_file = bamfile, window_size = 20)
+
+# Convert to data frames and add a 'chromosome' column
+coverage_A <- as.data.frame(temp_A) %>% mutate(chromosome = "NC_004830.2")
+coverage_B <- as.data.frame(temp_B) %>% mutate(chromosome = "NC_006494.1")
+
+# Combine both data frames
+coverage_df <- bind_rows(coverage_A, coverage_B)
+
+# Plot both coverage plots on the same axes
+plot1 <- ggplot(coverage_df, aes(x = start, y = coverage, color = chromosome)) +
+        geom_line() +
+        theme_minimal() +
+        labs(title = "Coverage Plot for Oahu-Waimanalo-1",
+          x = "Genomic Position",
+          y = "Read Depth") +
+        scale_color_manual(values = c("red", "blue"))  
+
+plot1
+
+```
+
+Now comparing this against the images I saved from IGV and yep - they look correct. The screenshots cut off at about 2x depth, but when I scroll down in igv they look the same.
+
+
+## now for other samples
+
+Here I use a loop to make one big dataframe then plot separately after.
+
+
+## Big Island
+
+Load the data. First copy all the bam files you want to use to a folder all together. Again, this folder must contain all .bam and corresponding .bam.bai files.
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder <- "./bams_BI/"
+
+# Get a list of all BAM files in the folder
+bam_files <- list.files(path = bam_folder, pattern = "\\.bam$", full.names = TRUE)
+
+# Define chromosomes of interest
+chroms_of_interest <- c("NC_004830.2", "NC_006494.1")
+
+# Initialize an empty list to store data frames
+all_coverage_data <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile in bam_files) {
+  
+  # Extract file name without path and extension
+  bam_name <- tools::file_path_sans_ext(basename(bamfile))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name)
+    
+    # Append to the list
+    all_coverage_data[[paste0(bam_name, "_", chrom)]] <- coverage_df
+  }
+}
+
+# Combine all data frames into one big data frame
+coverage_df_all <- bind_rows(all_coverage_data)
+
+# View the first few rows of the combined data
+head(coverage_df_all)
+
+```
+
+plot 
+
+
+```{r}
+
+plot_BI <- ggplot(coverage_df_all, aes(x = start, y = coverage, color = chromosome)) +
+    geom_line() +
+    facet_wrap(~bam, scales = "free_y") + # free_y makes all plots have logical y axes, without this they are all plotted on the same axis scale and some are too small to see properly
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+    scale_color_manual(values = c("red", "blue"))+
+  ggtitle("Big island DWV postives (excluding those with v low counts)")
+plot_BI
+
+
+#ggsave("Big_Island_DWV_coverage.pdf", plot = plot_BI, width = 7, height = 4)
+
+```
+
+
+
+## oahu plots
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder_o <- "./bams_oahu/"
+
+# Get a list of all BAM files in the folder
+bam_files_o <- list.files(path = bam_folder_o, pattern = "\\.bam$", full.names = TRUE)
+
+# Define chromosomes of interest
+chroms_of_interest <- c("NC_004830.2", "NC_006494.1")
+
+# Initialize an empty list to store data frames
+all_coverage_data_o <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile_o in bam_files_o) {
+  
+  # Extract file name without path and extension
+  bam_name_o <- tools::file_path_sans_ext(basename(bamfile_o))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile_o, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df_o <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name_o)
+    
+    # Append to the list
+    all_coverage_data_o[[paste0(bam_name_o, "_", chrom)]] <- coverage_df_o
+  }
+}
+
+# Combine all data frames into one big data frame
+coverage_df_all_o <- bind_rows(all_coverage_data_o)
+
+# View the first few rows of the combined data
+head(coverage_df_all_o)
+
+```
+
+```{r}
+
+plot_o <- ggplot(coverage_df_all_o, aes(x = start, y = coverage, color = chromosome)) +
+    geom_line() +
+    facet_wrap(~bam, scales = "free_y") +
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+    scale_color_manual(values = c("red", "blue"))+
+  ggtitle("Oahu DWV postives (excluding those with v low counts)")
+
+plot_o
+
+
+#ggsave("Oahu_DWV_coverage.pdf", plot = plot_o, width = 11, height = 8)
+#
+
+```
+
+
+It also possible to download the coverage data from Geneious as .csv files and plot from that.
+
+Recombinants can be determined using other methods too, I will try these next and compare to this method looking at whether reads map best to one genome or another.
