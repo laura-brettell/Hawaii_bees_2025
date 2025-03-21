@@ -1,0 +1,677 @@
+---
+title: "Hawaii2025_dwv_recomb_working"
+author: "Laura"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project
+
+Here I am exploring the data from Oxford Nanopore seq data from pooled bee samples collected from Hawaii in 2024/2025, we are looking at the viral lanscape, particularly DWV in Hawaii 15 years after our first study.
+
+There are 3 islands with different conditions: Oahu - treatment free, Big Island - treat for Varroa, and Kauai - no Varroa.
+
+RNA was extracted in Declan's lab with Clarissa and run across 4 libraries on the GridION
+
+These are the mapping data from mapping to a custom db with minimap2 in epitome labs. Here I will visualise coverage plots across DWV-A and DWV-B genomes to identify recombinants.
+
+I am then combining this with the data from previous years, to look at the timeline. The older samples are done using illumina seq so the plots look a bit different
+
+
+
+### install packages
+
+```{r}
+
+#if (!require("BiocManager", quietly = TRUE))
+#    install.packages("BiocManager")
+
+#BiocManager::install("Rsamtools")
+
+#BiocManager::install("gmoviz")
+
+library(Rsamtools) # for reading int he bam file
+#library(GenomicRanges)
+library(gmoviz) # for getCoverage
+library(ggplot2)
+library(dplyr)
+library(patchwork)
+
+
+```
+
+
+## first, the 2025 data
+
+
+First extract the relevant portions of the alignemnt:
+
+ "NC_004830.2" = DWV-A
+ "NC_006494.1" = DWV-B
+ 
+Then covert to data frames, combine them and plot
+
+
+
+### Big Island
+
+Load the data. First copy all the bam files you want to use to a folder all together. Again, this folder must contain all .bam and corresponding .bam.bai files. Make a loop to collate all the BI data
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder <- "./bams_BI/"
+
+# Get a list of all BAM files in the folder
+bam_files <- list.files(path = bam_folder, pattern = "\\.bam$", full.names = TRUE)
+
+# Define chromosomes of interest
+chroms_of_interest <- c("NC_004830.2", "NC_006494.1")
+
+# Initialize an empty list to store data frames
+all_coverage_data <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile in bam_files) {
+  
+  # Extract file name without path and extension
+  bam_name <- tools::file_path_sans_ext(basename(bamfile))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name)
+    
+    # Append to the list
+    all_coverage_data[[paste0(bam_name, "_", chrom)]] <- coverage_df
+  }
+}
+
+# Combine all data frames into one big data frame
+coverage_df_BI_2025 <- bind_rows(all_coverage_data)
+
+# View the first few rows of the combined data
+head(coverage_df_BI_2025)
+
+```
+
+### Oahu
+
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder_o <- "./bams_oahu/" # just overwriting the bam folder now, I don't need the old one stored in the R environment any more
+
+# Get a list of all BAM files in the folder
+bam_files_o <- list.files(path = bam_folder_o, pattern = "\\.bam$", full.names = TRUE)
+
+# Define chromosomes of interest
+chroms_of_interest <- c("NC_004830.2", "NC_006494.1")
+
+# Initialize an empty list to store data frames
+all_coverage_data_o <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile_o in bam_files_o) {
+  
+  # Extract file name without path and extension
+  bam_name_o <- tools::file_path_sans_ext(basename(bamfile_o))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile_o, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df_o <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name_o)
+    
+    # Append to the list
+    all_coverage_data_o[[paste0(bam_name_o, "_", chrom)]] <- coverage_df_o
+  }
+}
+
+# Combine all data frames into one big data frame
+coverage_df_O_2025 <- bind_rows(all_coverage_data_o)
+
+# View the first few rows of the combined data
+head(coverage_df_O_2025)
+
+```
+
+BI 2025 plots
+
+
+```{r}
+
+plot_BI_2025 <- ggplot(coverage_df_BI_2025, aes(x = start, y = coverage, color = chromosome)) +
+    geom_line() +
+    facet_wrap(~bam, scales = "free_y") + # free_y makes all plots have logical y axes, without this they are all plotted on the same axis scale and some are too small to see properly
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+    scale_color_manual(values = c("red", "blue"))+
+  ggtitle("Big island 2025")
+plot_BI_2025
+
+
+#ggsave("Big_Island_DWV_coverage.pdf", plot = plot_BI, width = 7, height = 4)
+
+```
+
+
+
+## oahu p2025 plots
+
+
+```{r}
+
+plot_o_2025 <- ggplot(coverage_df_O_2025, aes(x = start, y = coverage, color = chromosome)) +
+    geom_line() +
+    facet_wrap(~bam, scales = "free_y", ncol = 4) +
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + 
+    scale_color_manual(values = c("red", "blue"))+
+  ggtitle("Oahu 2025")+
+  theme(legend.position = "none")
+
+plot_o_2025
+
+#ggsave("21Mar_Oahu_DWV_coverage.pdf", plot = plot_o_2025, width = 12, height = 12)
+#
+
+```
+## now for the older data
+
+## Oahu 2009
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder_2009 <- "../data_old_runs/Old_Hawaii_data_reanalysis2025/bams_2009/"
+
+# Get a list of all BAM files in the folder
+bam_files_2009 <- list.files(path = bam_folder_2009, pattern = "\\.bam$", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+all_coverage_data_2009 <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile_2009 in bam_files_2009) {
+  
+  # Extract file name without path and extension
+  bam_name_2009 <- tools::file_path_sans_ext(basename(bamfile_2009))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile_2009, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df_2009 <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name_2009)
+    
+    # Append to the list
+    all_coverage_data_2009[[paste0(bam_name_2009, "_", chrom)]] <- coverage_df_2009
+  }
+}
+
+# I still get the error 'the index file is older than the bam file for everything, but that's fine - that's because I indexed second 
+
+# Combine all data frames into one big data frame
+coverage_df_o_2009 <- bind_rows(all_coverage_data_2009)
+
+# write.csv(coverage_df_all, "DWV_coverage_df_all.csv") # save this, then can run using this input rather than all the bams if need be
+
+# View the first few rows of the combined data
+head(coverage_df_o_2009)
+
+```
+
+
+## Oahu 2012
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder <- "../data_old_runs/Old_Hawaii_data_reanalysis2025/bams_2012/bams_2012_o/"
+
+# Get a list of all BAM files in the folder
+bam_files_o_2012 <- list.files(path = bam_folder, pattern = "\\.bam$", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+all_coverage_data_o_2012 <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile_o_2012 in bam_files_o_2012) {
+  
+  # Extract file name without path and extension
+  bam_name_o_2012 <- tools::file_path_sans_ext(basename(bamfile_o_2012))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile_o_2012, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df_o_2012 <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name_o_2012)
+    
+    # Append to the list
+    all_coverage_data_o_2012[[paste0(bam_name_o_2012, "_", chrom)]] <- coverage_df_o_2012
+  }
+}
+
+
+
+# Combine all data frames into one big data frame
+coverage_df_o_2012 <- bind_rows(all_coverage_data_o_2012)
+
+# write.csv(coverage_df_all, "DWV_coverage_df_all.csv") # save this, then can run using this input rather than all the bams if need be
+
+# View the first few rows of the combined data
+head(coverage_df_o_2012)
+
+```
+
+## BI 2012
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder <- "../data_old_runs/Old_Hawaii_data_reanalysis2025/bams_2012/bams_2012_BI/"
+
+# Get a list of all BAM files in the folder
+bam_files_BI_2012 <- list.files(path = bam_folder, pattern = "\\.bam$", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+all_coverage_data_BI_2012 <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile_BI_2012 in bam_files_BI_2012) {
+  
+  # Extract file name without path and extension
+  bam_name_BI_2012 <- tools::file_path_sans_ext(basename(bamfile_BI_2012))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile_BI_2012, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df_BI_2012 <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name_BI_2012)
+    
+    # Append to the list
+    all_coverage_data_BI_2012[[paste0(bam_name_BI_2012, "_", chrom)]] <- coverage_df_BI_2012
+  }
+}
+
+
+
+# Combine all data frames into one big data frame
+coverage_df_BI_2012 <- bind_rows(all_coverage_data_BI_2012)
+
+# write.csv(coverage_df_all, "DWV_coverage_df_all.csv") # save this, then can run using this input rather than all the bams if need be
+
+# View the first few rows of the combined data
+head(coverage_df_BI_2012)
+
+```
+## Oahu 2015
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder <- "../data_old_runs/Old_Hawaii_data_reanalysis2025/bams_2015/bams_2015_o/"
+
+# Get a list of all BAM files in the folder
+bam_files_o_2015 <- list.files(path = bam_folder, pattern = "\\.bam$", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+all_coverage_data_o_2015 <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile_o_2015 in bam_files_o_2015) {
+  
+  # Extract file name without path and extension
+  bam_name_o_2015 <- tools::file_path_sans_ext(basename(bamfile_o_2015))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile_o_2015, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df_o_2015 <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name_o_2015)
+    
+    # Append to the list
+    all_coverage_data_o_2015[[paste0(bam_name_o_2015, "_", chrom)]] <- coverage_df_o_2015
+  }
+}
+
+
+
+# Combine all data frames into one big data frame
+coverage_df_o_2015 <- bind_rows(all_coverage_data_o_2015)
+
+# write.csv(coverage_df_all, "DWV_coverage_df_all.csv") # save this, then can run using this input rather than all the bams if need be
+
+# View the first few rows of the combined data
+head(coverage_df_o_2015)
+
+```
+
+## BI 2015
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder <- "../data_old_runs/Old_Hawaii_data_reanalysis2025/bams_2015/bams_2015_BI/"
+
+# Get a list of all BAM files in the folder
+bam_files_BI_2015 <- list.files(path = bam_folder, pattern = "\\.bam$", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+all_coverage_data_BI_2015 <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile_BI_2015 in bam_files_BI_2015) {
+  
+  # Extract file name without path and extension
+  bam_name_BI_2015 <- tools::file_path_sans_ext(basename(bamfile_BI_2015))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile_BI_2015, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df_BI_2015 <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name_BI_2015)
+    
+    # Append to the list
+    all_coverage_data_BI_2015[[paste0(bam_name_BI_2015, "_", chrom)]] <- coverage_df_BI_2015
+  }
+}
+
+
+
+# Combine all data frames into one big data frame
+coverage_df_BI_2015 <- bind_rows(all_coverage_data_BI_2015)
+
+# write.csv(coverage_df_all, "DWV_coverage_df_all.csv") # save this, then can run using this input rather than all the bams if need be
+
+# View the first few rows of the combined data
+head(coverage_df_BI_2015)
+
+```
+## Oahu 2016
+
+```{r}
+
+# Define the folder containing BAM files
+bam_folder <- "../data_old_runs/Old_Hawaii_data_reanalysis2025/bams_2016"
+
+# Get a list of all BAM files in the folder
+bam_files_o_2016 <- list.files(path = bam_folder, pattern = "\\.bam$", full.names = TRUE)
+
+# Initialize an empty list to store data frames
+all_coverage_data_o_2016 <- list()
+
+# Loop through each BAM file and extract coverage data
+for (bamfile_o_2016 in bam_files_o_2016) {
+  
+  # Extract file name without path and extension
+  bam_name_o_2016 <- tools::file_path_sans_ext(basename(bamfile_o_2016))
+  
+  # Loop through chromosomes and extract coverage data
+  for (chrom in chroms_of_interest) {
+    temp <- getCoverage(regions_of_interest = chrom, bam_file = bamfile_o_2016, window_size = 20)
+    
+    # Convert to data frame and add columns for BAM file and chromosome
+    coverage_df_o_2016 <- as.data.frame(temp) %>%
+      mutate(chromosome = chrom, bam = bam_name_o_2016)
+    
+    # Append to the list
+    all_coverage_data_o_2016[[paste0(bam_name_o_2016, "_", chrom)]] <- coverage_df_o_2016
+  }
+}
+
+
+
+# Combine all data frames into one big data frame
+coverage_df_o_2016 <- bind_rows(all_coverage_data_o_2016)
+
+# write.csv(coverage_df_all, "DWV_coverage_df_all.csv") # save this, then can run using this input rather than all the bams if need be
+
+# View the first few rows of the combined data
+head(coverage_df_o_2016)
+
+```
+
+## oahu plots
+
+```{r}
+
+# 2009
+
+plot_o_2009 <- ggplot(coverage_df_o_2009, aes(x = start, y = coverage, color = chromosome)) +
+    geom_point(alpha = 0.4, size = 1) +
+  #geom_smooth(method = "loess", span = 0.2, se = FALSE) +  # Apply smoothing
+    facet_wrap(~bam, scales = "free_y", ncol = 4) + # free_y makes all plots have logical y axes, without this they are all plotted on the same axis scale and some are too small to see properly
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth (log10 scale)") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+               aspect.ratio = 1) +  # Ensures all facets have the same shape) + 
+    scale_color_manual(values = c("red", "blue"))+
+    scale_y_log10() + 
+    ggtitle("2009")+
+  theme(legend.position = "none")
+
+#plot_o_2009
+
+# 2012
+
+plot_o_2012 <- ggplot(coverage_df_o_2012, aes(x = start, y = coverage, color = chromosome)) +
+    geom_point(alpha = 0.4, size = 1) +
+  #geom_smooth(method = "loess", span = 0.2, se = FALSE) +  # Apply smoothing
+    facet_wrap(~bam, scales = "free_y", ncol = 4) + # free_y makes all plots have logical y axes, without this they are all plotted on the same axis scale and some are too small to see properly
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth (log10 scale)") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+               aspect.ratio = 1) +  # Ensures all facets have the same shape) + 
+    scale_color_manual(values = c("red", "blue"))+
+    scale_y_log10() + 
+    ggtitle("2012")+
+  theme(legend.position = "none")
+
+#plot_o_2012
+
+# 2015
+
+plot_o_2015 <- ggplot(coverage_df_o_2015, aes(x = start, y = coverage, color = chromosome)) +
+    geom_point(alpha = 0.4, size = 1) +
+  #geom_smooth(method = "loess", span = 0.2, se = FALSE) +  # Apply smoothing
+    facet_wrap(~bam, scales = "free_y", ncol = 3) + # free_y makes all plots have logical y axes, without this they are all plotted on the same axis scale and some are too small to see properly
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth (log10 scale)") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+               aspect.ratio = 1) +  # Ensures all facets have the same shape) + 
+    scale_color_manual(values = c("red", "blue"))+
+    scale_y_log10() + 
+    ggtitle("2015")+
+  theme(legend.position = "none")
+
+plot_o_2015
+
+
+
+# 2016
+
+plot_o_2016 <- ggplot(coverage_df_o_2016, aes(x = start, y = coverage, color = chromosome)) +
+    geom_point(alpha = 0.4, size = 1) +
+  #geom_smooth(method = "loess", span = 0.2, se = FALSE) +  # Apply smoothing
+    facet_wrap(~bam, scales = "free_y", ncol = 3) + # free_y makes all plots have logical y axes, without this they are all plotted on the same axis scale and some are too small to see properly
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth (log10 scale)") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+               aspect.ratio = 1) +  # Ensures all facets have the same shape) + 
+    scale_color_manual(values = c("red", "blue"))+
+    scale_y_log10() + 
+    ggtitle("2016") +
+  theme(legend.position = "none")
+
+#plot_o_2016
+
+```
+
+
+
+
+
+
+```{r}
+
+oahu_old <- (plot_o_2009 / plot_o_2012 / plot_o_2015 / plot_o_2016) + 
+  plot_layout(ncol = 1, heights = c(2, 2, 2, 2), widths = c(2, 4, 3, 3)) #, guides = "collect")  # Adjust heights based on facet count
+
+#old_cov <- ggarrange(plot_2009a, plot_2012a, plot_2015a, plot_2016a, ncol = 1, nrow = 4)
+
+oahu_old
+
+#oahu_all <- (plot_o_2009 / plot_o_2012 / plot_o_2015 / plot_o_2016 / plot_o_2025a) + 
+  plot_layout(ncol = 1, heights = c(2, 2, 2, 2, 8), widths = c(2, 4, 3, 3, 4))
+
+#oahu_all
+#ggsave("21Mar_oahu_old_cov_plots.pdf", plot = oahu_old, width = 12, height = 12 )
+
+
+```
+
+```{r}
+
+# 2025
+
+plot_o_2025a <- ggplot(coverage_df_O_2025, aes(x = start, y = coverage, color = chromosome)) +
+    geom_line() +
+    facet_wrap(~bam, scales = "free_y", ncol = 4) +
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+               aspect.ratio = 1) + 
+    scale_color_manual(values = c("red", "blue"))+
+  ggtitle("Oahu 2025")+
+  theme(legend.position = "none")
+
+plot_o_2025a
+
+#ggsave("21Mar_oahu_2025_cov_plots_v2.pdf", plot = plot_o_2025a, width = 12, height = 10 )
+
+
+```
+
+
+
+## Big Island plots
+
+```{r}
+
+# only data from 2 previous years from BI
+
+
+# 2012
+
+plot_BI_2012 <- ggplot(coverage_df_BI_2012, aes(x = start, y = coverage, color = chromosome)) +
+    geom_point(alpha = 0.4, size = 1) +
+  #geom_smooth(method = "loess", span = 0.2, se = FALSE) +  # Apply smoothing
+    facet_wrap(~bam, scales = "free_y", ncol = 4) + # free_y makes all plots have logical y axes, without this they are all plotted on the same axis scale and some are too small to see properly
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth (log10 scale)") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+               aspect.ratio = 1) +  # Ensures all facets have the same shape) + 
+    scale_color_manual(values = c("red", "blue"))+
+    scale_y_log10() + 
+    ggtitle("2012")+
+  theme(legend.position = "none")
+
+#plot_BI_2012
+
+# 2015
+
+plot_BI_2015 <- ggplot(coverage_df_BI_2015, aes(x = start, y = coverage, color = chromosome)) +
+    geom_point(alpha = 0.4, size = 1) +
+  #geom_smooth(method = "loess", span = 0.2, se = FALSE) +  # Apply smoothing
+    facet_wrap(~bam, scales = "free_y", ncol = 1) + # free_y makes all plots have logical y axes, without this they are all plotted on the same axis scale and some are too small to see properly
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth (log10 scale)") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+               aspect.ratio = 1) +  # Ensures all facets have the same shape) + 
+    scale_color_manual(values = c("red", "blue"))+
+    scale_y_log10() + 
+    ggtitle("2015")+
+  theme(legend.position = "none")
+
+#plot_BI_2015
+
+
+
+```
+
+```{r}
+
+BI_old <- (plot_BI_2012 / plot_BI_2015) + 
+  plot_layout(ncol = 1, heights = c(2, 2), widths = c(4, 1)) #, guides = "collect")  # Adjust heights based on facet count
+
+#old_cov <- ggarrange(plot_2009a, plot_2012a, plot_2015a, plot_2016a, ncol = 1, nrow = 4)
+
+
+
+BI_old
+
+#ggsave("21Mar_BI_old_cov_plots.pdf", plot = BI_old, width = 12, height = 6 )
+
+
+```
+
+```{r}
+
+# 2025
+
+plot_BI_2025a <- ggplot(coverage_df_BI_2025, aes(x = start, y = coverage, color = chromosome)) +
+    geom_line() +
+    facet_wrap(~bam, scales = "free_y", ncol = 4) +
+    theme_minimal() +
+    labs(x = "Genomic Position",
+         y = "Read Depth") +
+         theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+               aspect.ratio = 1) + 
+    scale_color_manual(values = c("red", "blue"))+
+  ggtitle("BI 2025")+
+  theme(legend.position = "none")
+
+plot_BI_2025a
+
+#ggsave("21Mar_BI_2025_cov_plots_v2.pdf", plot = plot_BI_2025a, width = 12, height = 6 )
+
+
+```
+
+
+perhaps I can better combine them later, but for now I will combine all 4 combo plots into one figure in Illustrator. I also might change the sample names in Illustrator too (I will for 2025 data for consistency), but for now just arranging.
+
+
+
