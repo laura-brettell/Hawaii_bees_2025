@@ -1,0 +1,1012 @@
+---
+title: "old_Hawaii_data_summaries"
+author: "Laura Brettell"
+date: "2025-03-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## About
+
+Here I am exploring how virome composition has changed in Hawaii 15 years after our first study.
+
+This script is looking at old data from previous short read sequencing efforts, and preparing relative abundance plots with different viruses to compare to the 2025 data.
+
+The reads were trimmed and mapped to a custom virus db with bowtie, and the results coverted to sorted bam files and converted into a csv, similar to how it was done for the nanopre data using minimap2 in epi2me. I have also prepared a second file of number of reads pre-trimming (manually, from the fastp reports) so that I can calculate the proportion of mapped reads
+
+
+`### install packages
+
+```{r}
+#install.packages("ggforce")
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+library(tibble)
+library(patchwork)  # For combining plots
+library(forcats) # for fct_relevel
+library(ggforce)  # For scaled pie charts
+library(ggpubr)
+
+```
+
+
+### load data
+
+```{r}
+
+dat_old <- read.csv("./virus_counts_matrix_edit_3.csv") # the counts
+dat_old <- subset(dat_old, select = -c(accession)) # remove accesion - just using names for nice legends
+
+meta_old <- read.csv("./sample_lists/old_samples_list_all.csv") # metatdata
+
+meta_old <- meta_old[meta_old$data == "yes", ] # remove samples with corrupted files
+meta_old <- meta_old %>% select(c(sample_id, Varroa_status, island, year)) #keep relevant info
+
+```
+
+prepare to plot histogram of virus reads
+
+```{r}
+
+df_viruses_long_old <- dat_old %>%
+  filter(virus != "total_virus") %>%  # Remove total row
+  filter(virus != "total_trim_reads") %>%  # Remove total row
+  filter(virus != "total_pair") %>%  # Remove total row
+  pivot_longer(cols = -virus, names_to = "sample_id", values_to = "Read_Count")  # Reshape
+
+
+merged_df_extended_old <- meta_old %>%
+  left_join(df_viruses_long_old, by = "sample_id")
+
+#merged_df_extended$Read_Count <- as.numeric(as.character(merged_df_extended$Read_Count))
+#already numeric
+
+# for some reason each sample has a total here, I need to remove it
+
+#merged_df_extended <- merged_df_extended %>%
+ # filter(Species != "Total")
+
+```
+
+the accessions I have used for each virus reference - these are the same ones as used with the nanopore data (the ones from the output mapping table from epi2me)
+
+KU645789.1	Moku_virus
+MT504363.1	DWV_D
+CEND01000001.1	DWV_C
+NC_004830.2	DWV_A
+NC_006494.1	DWV_B
+NC_074993.1	LSV_2Bruce
+NC_035467.1	LSV_2VN3
+NC_035113.1	LSV_NE1
+NC_035112.1	LSV_A2
+NC_032433.1	LSV_WHCC
+NC_027925.1	AMVF
+NC_002548.1	ABPV
+NC_003784.1	BQCV
+NC_009025.1	IAPV
+NC_004807.1	KBV # no hits to this in db
+NC_002066.1	SBV
+NC_014137.1	SBPV
+MF155030.1	MiV
+
+set colours
+
+```{r}
+
+# all the LSV colours might be mixed up fromthe 2025 data - check and match accessions later
+
+custom_colours3 <- c(
+  "DWV_A" = "#d62828", 
+  "DWV_B" = "#064789", 
+  "SBV" = "#EDAE49", 
+  "AMFV" = "#ECA0FF", 
+  "LSV_2Bruce" = "#A3D9D1", 
+  "LSV_2VN3" = "#70C4B7", 
+  "LSV_NE1" = "#4BB0A3", 
+  "LSV_A2" = "#289D8F",  
+  "LSV_WHCC" = "#1F7E72", 
+ # "Lake Sinai virus TO" = "#14564D", 
+  "BQCV" = "black", 
+  "DWV_C"	 = "grey", 
+  "Moku" = "#A7C957",	
+  "DWV_D" = "#F25F5C",	
+  "ABPV"	= "#6A0572", 
+  "IAPV"	= "#468FAF", 
+  "SBPV"	= "#C89F9C", 
+  "MiV" = "#FF9B71"	
+ )
+
+#custom_colours3 <- c(
+#  "NC_004830.2" = "#d62828", #DWV A
+#  "NC_006494.1" = "#064789", #DWV b
+#  "NC_002066.1" = "#EDAE49", #SBV
+#  "NC_027925.1" = "#ECA0FF", #AMFV
+#  "NC_074993.1" = "#A3D9D1", #LSV_2Bruce
+#  "NC_035467.1" = "#70C4B7", #LSV_2VN3
+#  "NC_035113.1" = "#4BB0A3", #LSV_NE1
+#  "NC_035112.1" = "#289D8F",  #LSV_A2
+#  "NC_032433.1" = "#1F7E72", #LSV_WHCC
+ # "Lake Sinai virus TO" = "#14564D", 
+#  "NC_003784.1" = "black", #BQCV
+#  "CEND01000001.1"	 = "grey", #DWV_C
+#  "KU645789.1" = "#A7C957",	#Moku_virus
+#  "MT504363.1" = "#F25F5C",	#DWV_D
+#  "NC_002548.1"	= "#6A0572", #ABPV
+#  "NC_009025.1"	= "#468FAF", #IAPV
+#  "NC_014137.1"	= "#C89F9C", #SBPV
+#  "MF155030.1" = "#FF9B71"	#MiV
+# )
+
+```
+
+
+
+### First, plot histogram with raw virus counts per sample
+
+```{r}
+
+ 
+plot_virome_old <- merged_df_extended_old %>% 
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Read_Count, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "Total virus Reads per Sample by varroa status",
+    y = "Total reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+plot_virome_old
+
+# Save as PDF
+#ggsave("reads_breakdown.pdf", plot = plot_virome_old, width = 13, height = 9)
+
+
+
+```
+
+### now broken down by year 
+
+split df to plot by year
+
+```{r}
+
+# 2009
+dat_2009 <- merged_df_extended_old[merged_df_extended_old$year == 2009,]
+
+dat_2012 <- merged_df_extended_old[merged_df_extended_old$year == 2012,]
+
+dat_2015 <- merged_df_extended_old[merged_df_extended_old$year == 2015,]
+
+dat_2016 <- merged_df_extended_old[merged_df_extended_old$year == 2016,]
+
+#dat_2015_16 <- merged_df_extended_old[merged_df_extended_old$year != 2012,]
+#dat_2015_16 <- merged_df_extended_old[merged_df_extended_old$year != 2009,]
+
+
+```
+
+
+make the separate plots for each year
+
+```{r}
+
+# 2009
+ 
+plot_virome_2009 <- dat_2009 %>% 
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Read_Count, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "2009",
+    y = "Total reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+#plot_virome_2009
+
+# 2012
+ 
+plot_virome_2012 <- dat_2012 %>% 
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Read_Count, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "2012",
+    y = "Total reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+#plot_virome_2012
+
+# 2015
+ 
+plot_virome_2015 <- dat_2015 %>% 
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Read_Count, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "2015",
+    y = "Total reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+#plot_virome_2015
+
+
+# 2016
+ 
+plot_virome_2016 <- dat_2016 %>% 
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Read_Count, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "2016",
+    y = "Total reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+#plot_virome_2016
+
+
+# Save as PDF
+#ggsave("reads_breakdown.pdf", plot = plot2, width = 13, height = 9)
+
+
+
+```
+
+now present the plots all together
+
+```{r}
+
+#plot2a + plot2b + plot_layout(ncol = 2)
+
+layout <- "
+A
+B
+C
+D
+"
+
+comb_plot <- plot_virome_2009 +
+  plot_virome_2012 +
+  plot_virome_2015 +
+  plot_virome_2016 +
+  plot_layout(design = layout, guides = "collect") &  # Collects legend
+  theme(legend.position = "bottom")  # Places it below
+
+comb_plot
+
+#ggsave("19Mar_old_data_histograms_reads.pdf", plot = comb_plot, width = 6, height = 12)
+
+
+```
+
+ok now for as relative abundance to show the small amounts in the no varroa islands. All together for an overall look
+
+```{r}
+
+pl_virome_old_relabund <- merged_df_extended_old %>% 
+   group_by(sample_id) %>%
+  mutate(Proportion = Read_Count / sum(Read_Count)) %>%  # Compute proportion per sample
+  ungroup() %>% 
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Proportion, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "realtive abundance of bee virus Reads per Sample by varroa status",
+    y = "Total reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+pl_virome_old_relabund
+
+# Save as PDF
+#ggsave("relative_abundance_bee_viruses.pdf", plot = plot4, width = 13, height = 9)
+
+
+```
+
+
+### applying cutoffs
+
+with the nanopore data I cut off anything below proportion of reads that are viral < 0.0001 (0.01%)
+
+prepare the data
+
+```{r}
+# first, add a column of total reads to the counts table 
+
+merged_df_extended_old2 <- merged_df_extended_old # keep a copy of the original for now
+
+dat_old_totals <- dat_old %>% filter(
+  virus == "total_virus" | virus == "total_trim_reads" | virus == "total_pair"
+)
+
+# Convert dat_old_totals from wide to long format
+dat_old_totals_long <- dat_old_totals %>%
+  pivot_longer(cols = -virus, names_to = "sample_id", values_to = "Count") %>%
+  pivot_wider(names_from = virus, values_from = Count)
+
+# Merge with merged_df_extended_old2 on 'Sample'
+merged_df_final_old <- merged_df_extended_old2 %>%
+  left_join(dat_old_totals_long, by = "sample_id")
+
+# View result
+head(merged_df_final_old)
+
+```
+  
+
+do cutoffs
+
+```{r}
+
+# calculate the proportion of reads mapping ot each virus, in each sample
+merged_df_final_old$Proportion_reads <- ifelse(
+  merged_df_final_old$total_trim_reads == 0, 
+  NA, 
+  merged_df_final_old$Read_Count / merged_df_final_old$total_trim_reads
+)
+
+# impose a cutoff and create new column keeping all those virus reads at proportion >= 0.001, and replacing all those below with zeros
+merged_df_final_old$count_cutoff <- ifelse(
+  merged_df_final_old$Proportion_reads < 0.0001, 
+  0, 
+  merged_df_final_old$Read_Count
+)
+
+```
+
+now repeat plots with cutoffs applied - first just the cutoff numbers - this looks no different because only tiny amount viruses are gone
+
+```{r}
+temp_cutoff_plot <- merged_df_final_old %>% 
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = count_cutoff, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "Total virus Reads per Sample by varroa status",
+    subtitle = "Removed all viruses with proportion < 0.001 of total",
+    y = "Total reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+temp_cutoff_plot
+
+
+
+```
+
+separate the data into years
+
+```{r}
+
+dat_2009_cut <- merged_df_final_old[merged_df_final_old$year == 2009,]
+
+dat_2012_cut <- merged_df_final_old[merged_df_final_old$year == 2012,]
+
+dat_2015_cut <- merged_df_final_old[merged_df_final_old$year == 2015,]
+
+dat_2016_cut <- merged_df_final_old[merged_df_final_old$year == 2016,]
+
+
+```
+
+
+
+```{r}
+
+# 2009
+
+
+plot_virome_2009_cut <- dat_2009_cut %>% 
+  group_by(sample_id) %>%
+  mutate(Proportion = Read_Count / sum(Read_Count)) %>%  # Compute proportion per sample
+  ungroup() %>%
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Proportion, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack", width = 0.2) +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "2009",
+    y = "proportion of viral reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+
+# 2012
+ 
+plot_virome_2012_cut <- dat_2012_cut %>% 
+  group_by(sample_id) %>%
+  mutate(Proportion = Read_Count / sum(Read_Count)) %>%  # Compute proportion per sample
+  ungroup() %>%
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Proportion, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "2012",
+    y = "proportion of viral reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+
+# 2015
+ 
+plot_virome_2015_cut <- dat_2015_cut %>% 
+  group_by(sample_id) %>%
+  mutate(Proportion = Read_Count / sum(Read_Count)) %>%  # Compute proportion per sample
+  ungroup() %>%
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Proportion, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "2015",
+    y = "proportion of viral reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+
+
+# 2016
+ 
+plot_virome_2016_cut <- dat_2016_cut %>% 
+  group_by(sample_id) %>%
+  mutate(Proportion = Read_Count / sum(Read_Count)) %>%  # Compute proportion per sample
+  ungroup() %>%
+  mutate(
+    island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")
+  ) %>%  
+  ggplot(aes(x = sample_id, y = Proportion, fill = virus)) +
+  geom_bar( stat = "identity", position = "stack") +
+  scale_fill_manual(values = custom_colours3) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+    title = "2016",
+    y = "proportion of viral reads"
+  ) +
+    theme(
+    plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 15, face = "bold"),
+    strip.text.y = element_text(angle = 270, face = "bold"),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text = element_text(size = 5),
+    legend.position = "bottom",
+    panel.grid.major.y = element_blank(),
+    ) +
+  theme_minimal()
+
+
+
+```
+
+
+
+```{r}
+
+#plot2a + plot2b + plot_layout(ncol = 2)
+
+#layout <- "
+#A
+#B
+#C
+#D
+#"
+
+comb_plot_cut <- plot_virome_2009_cut +
+  plot_virome_2012_cut +
+  plot_virome_2015_cut +
+  plot_virome_2016_cut +
+  plot_layout(design = layout, guides = "collect") &  # Collects legend
+  theme(legend.position = "bottom")  # Places it below
+
+comb_plot_cut
+
+#ggsave("19Mar_old_data_histograms_reads_cutoffs.pdf", plot = comb_plot_cut, width = 8, height = 12)
+
+
+```
+
+
+# now to plot the proportions of reads in each sample that are viral
+
+
+```{r}
+
+# 2009
+
+proportion_plot_2009 <- dat_2009_cut %>%
+  group_by(sample_id, Varroa_status) %>%
+  summarise(bee_virus_Proportion = sum(count_cutoff) / unique(total_trim_reads), .groups = "drop") %>%  # Compute virus proportion
+  mutate(island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")) %>%
+  ggplot(aes(x = sample_id, y = bee_virus_Proportion, fill = "Virus Proportion")) + 
+  geom_col(alpha = 0.8, width = 0.2) +
+  scale_fill_manual(values = "black", name = "Reads assigned to bee viruses") +  # Use a single fill color
+  ylim(0, 0.4) +
+  coord_flip() +
+  facet_grid(rows = vars(island), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+ #   title = "Proportion of Total Reads",
+#    subtitle = "all hawaii data",
+    y = "Proportion of total reads belonging to viruses"
+  ) +
+  theme(
+  #  plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 10, face = "bold"),
+    strip.text.y = element_blank(),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),  # Removes y-axis labels
+    axis.ticks.y = element_blank(), # Removes y-axis ticks
+    axis.text = element_text(size = 5),
+   legend.position = "none",
+    panel.grid.major.y = element_blank()
+  ) +
+  theme_minimal()
+
+#proportion_plot_2009
+
+
+# 2012
+
+proportion_plot_2012 <- dat_2012_cut %>%
+  group_by(sample_id, Varroa_status) %>%
+  summarise(bee_virus_Proportion = sum(count_cutoff) / unique(total_trim_reads), .groups = "drop") %>%  # Compute virus proportion
+  mutate(island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")) %>%
+  ggplot(aes(x = sample_id, y = bee_virus_Proportion, fill = "Virus Proportion")) + 
+  geom_col(alpha = 0.8, width = 0.85) +
+  scale_fill_manual(values = "black", name = "Reads assigned to bee viruses") +  # Use a single fill color
+  ylim(0, 0.4) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+ #   title = "Proportion of Total Reads",
+#    subtitle = "all hawaii data",
+    y = "Proportion of total reads belonging to viruses"
+  ) +
+  theme(
+  #  plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 10, face = "bold"),
+    strip.text.y = element_blank(),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),  # Removes y-axis labels
+    axis.ticks.y = element_blank(), # Removes y-axis ticks
+    axis.text = element_text(size = 5),
+   legend.position = "none",
+    panel.grid.major.y = element_blank()
+  ) +
+  theme_minimal()
+
+#proportion_plot_2012
+
+# 2015
+
+proportion_plot_2015 <- dat_2015_cut %>%
+  group_by(sample_id, Varroa_status) %>%
+  summarise(bee_virus_Proportion = sum(count_cutoff) / unique(total_trim_reads), .groups = "drop") %>%  # Compute virus proportion
+  mutate(island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")) %>%
+  ggplot(aes(x = sample_id, y = bee_virus_Proportion, fill = "Virus Proportion")) + 
+  geom_col(alpha = 0.8, width = 0.85) +
+  scale_fill_manual(values = "black", name = "Reads assigned to bee viruses") +  # Use a single fill color
+  ylim(0, 0.4) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+#    title = "Proportion of Total Reads",
+#    subtitle = "all hawaii data",
+    y = "Proportion of total reads belonging to viruses"
+  ) +
+  theme(
+  #  plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 10, face = "bold"),
+    strip.text.y = element_blank(),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),  # Removes y-axis labels
+    axis.ticks.y = element_blank(), # Removes y-axis ticks
+    axis.text = element_text(size = 5),
+   legend.position = "none",
+    panel.grid.major.y = element_blank()
+  ) +
+  theme_minimal()
+
+#proportion_plot_2015
+
+
+# 2016
+
+proportion_plot_2016 <- dat_2016_cut %>%
+  group_by(sample_id, Varroa_status) %>%
+  summarise(bee_virus_Proportion = sum(count_cutoff) / unique(total_trim_reads), .groups = "drop") %>%  # Compute virus proportion
+  mutate(island = fct_relevel(Varroa_status, "Varroa", "no_Varroa")) %>%
+  ggplot(aes(x = sample_id, y = bee_virus_Proportion, fill = "Virus Proportion")) + 
+  geom_col(alpha = 0.8, width = 0.85) +
+  scale_fill_manual(values = "black", name = "Reads assigned to bee viruses") +  # Use a single fill color
+  ylim(0, 0.4) +
+  coord_flip() +
+  facet_grid(rows = vars(Varroa_status), scales = "free_y", switch = "y", space = "free_y") +
+  labs(
+ #   title = "Proportion of Total Reads",
+#    subtitle = "all hawaii data",
+    y = "Proportion of total reads belonging to viruses"
+  ) +
+  theme(
+  #  plot.margin = margin(0.5, 0.5, 0.5, 0.5, unit = "cm"),
+    plot.title = element_text(size = 10, face = "bold"),
+    strip.text.y = element_blank(),
+    strip.placement = "outside",
+    axis.title.x = element_text(margin = margin(t = 0.5, b = 0.5, unit = "cm")),
+    axis.title.y = element_blank(),
+    axis.text.y = element_blank(),  # Removes y-axis labels
+    axis.ticks.y = element_blank(), # Removes y-axis ticks
+    axis.text = element_text(size = 5),
+   legend.position = "none",
+    panel.grid.major.y = element_blank()
+  ) +
+  theme_minimal()
+
+#proportion_plot_2016
+
+
+
+
+```
+# plot rel abund and proportion of bee viruses together
+
+```{r}
+
+#plot2a + plot2b + plot_layout(ncol = 2)
+
+layout2 <- "
+AAAAAABB
+CCCCCCDD
+EEEEEEFF
+GGGGGGHH
+"
+
+
+comb_plot_cut <- plot_virome_2009_cut +
+  proportion_plot_2009 +
+  plot_virome_2012_cut +
+  proportion_plot_2012 +
+  plot_virome_2015_cut +
+  proportion_plot_2015 +
+  plot_virome_2016_cut +
+  proportion_plot_2016 +
+  plot_layout(design = layout2, guides = "collect") &  # Collects legend
+  theme(legend.position = "bottom")  # Places it below
+
+comb_plot_cut
+
+ggsave("19Mar_old_data_combo_plot_cutoffs.pdf", plot = comb_plot_cut, width = 15, height = 12)
+
+
+```
+
+
+# pies
+
+
+2009 pie
+
+```{r}
+# Compute relative abundance per island, ensuring it sums to 1
+av_df_2009 <- dat_2009_cut %>%
+  group_by(Varroa_status, virus) %>%
+  summarise(total_reads = sum(count_cutoff), .groups = "drop") %>% 
+  group_by(Varroa_status) %>%
+  mutate(avg_proportion = total_reads / sum(total_reads))  # Normalize within each varroa status
+
+# Create the faceted pie chart with full circles
+pie_2009 <- ggplot(av_df_2009, aes(x = "", y = avg_proportion, fill = virus)) +
+  geom_bar(stat = "identity", width = 1) +  # Creates the bar segments
+  coord_polar(theta = "y") +  # Converts bars into pie charts
+  facet_wrap(~Varroa_status) +  # One pie chart per island
+  scale_fill_manual(values = custom_colours3) +  # Use custom colors
+  labs(
+    title = "Average Relative Abundance of Bee Viruses 2009",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(),  # Remove axis text
+    axis.ticks = element_blank(),  # Remove axis ticks
+    panel.grid = element_blank(),  # Remove background grid
+    legend.position = "bottom"
+  )
+
+pie_2009
+
+#ggsave("05Mar_bee_virus_pies_2009.pdf", plot = pie_2009, width = 7, height = 4)
+
+```
+
+2012 pie
+
+```{r}
+# Compute relative abundance per island, ensuring it sums to 1
+av_df_2012 <- dat_2012_cut %>%
+  group_by(Varroa_status, virus) %>%
+  summarise(total_reads = sum(count_cutoff), .groups = "drop") %>% 
+  group_by(Varroa_status) %>%
+  mutate(avg_proportion = total_reads / sum(total_reads))  # Normalize within each varroa status
+
+# Create the faceted pie chart with full circles
+pie_2012 <- ggplot(av_df_2012, aes(x = "", y = avg_proportion, fill = virus)) +
+  geom_bar(stat = "identity", width = 1) +  # Creates the bar segments
+  coord_polar(theta = "y") +  # Converts bars into pie charts
+  facet_wrap(~Varroa_status) +  # One pie chart per island
+  scale_fill_manual(values = custom_colours3) +  # Use custom colors
+  labs(
+    title = "Average Relative Abundance of Bee Viruses 2012",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(),  # Remove axis text
+    axis.ticks = element_blank(),  # Remove axis ticks
+    panel.grid = element_blank(),  # Remove background grid
+    legend.position = "bottom"
+  )
+
+pie_2012
+
+#ggsave("05Mar_bee_virus_pies_2012.pdf", plot = pie_2012, width = 7, height = 4)
+
+```
+
+2015 pie
+
+```{r}
+# Compute relative abundance per island, ensuring it sums to 1
+av_df_2015 <- dat_2015_cut %>%
+  group_by(Varroa_status, virus) %>%
+  summarise(total_reads = sum(count_cutoff), .groups = "drop") %>% 
+  group_by(Varroa_status) %>%
+  mutate(avg_proportion = total_reads / sum(total_reads))  # Normalize within each varroa status
+
+# Create the faceted pie chart with full circles
+pie_2015 <- ggplot(av_df_2015, aes(x = "", y = avg_proportion, fill = virus)) +
+  geom_bar(stat = "identity", width = 1) +  # Creates the bar segments
+  coord_polar(theta = "y") +  # Converts bars into pie charts
+  facet_wrap(~Varroa_status) +  # One pie chart per island
+  scale_fill_manual(values = custom_colours3) +  # Use custom colors
+  labs(
+    title = "Average Relative Abundance of Bee Viruses 2015",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(),  # Remove axis text
+    axis.ticks = element_blank(),  # Remove axis ticks
+    panel.grid = element_blank(),  # Remove background grid
+    legend.position = "bottom"
+  )
+
+pie_2015
+
+#ggsave("05Mar_bee_virus_pies_2015.pdf", plot = pie_2015, width = 7, height = 4)
+
+```
+
+2016 pie
+
+```{r}
+# Compute relative abundance per island, ensuring it sums to 1
+av_df_2016 <- dat_2016_cut %>%
+  group_by(Varroa_status, virus) %>%
+  summarise(total_reads = sum(count_cutoff), .groups = "drop") %>% 
+  group_by(Varroa_status) %>%
+  mutate(avg_proportion = total_reads / sum(total_reads))  # Normalize within each varroa status
+
+# Create the faceted pie chart with full circles
+pie_2016 <- ggplot(av_df_2016, aes(x = "", y = avg_proportion, fill = virus)) +
+  geom_bar(stat = "identity", width = 1) +  # Creates the bar segments
+  coord_polar(theta = "y") +  # Converts bars into pie charts
+  facet_wrap(~Varroa_status) +  # One pie chart per island
+  scale_fill_manual(values = custom_colours3) +  # Use custom colors
+  labs(
+    title = "Average Relative Abundance of Bee Viruses 2016",
+    x = NULL, y = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text = element_blank(),  # Remove axis text
+    axis.ticks = element_blank(),  # Remove axis ticks
+    panel.grid = element_blank(),  # Remove background grid
+    legend.position = "bottom"
+  )
+
+pie_2016
+
+#ggsave("05Mar_bee_virus_pies_2016.pdf", plot = pie_2016, width = 7, height = 4)
+
+```
+
+
+
+```{r}
+
+
+
+```
+
+```{r}
+
+
+
+```
+
+
+
