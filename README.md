@@ -14,10 +14,12 @@ This repository contains the scripts to analyse the data and generate the figure
 The 2024-25 data were initially processed in Epi2me - The fastq files for each sample were mapped against a custom database using minimap2 to generate abundance tables (tsv) and alignment files (bam and bam.bai).
 
 The 2009-26 data were obtained as fastq format and trimmed with fastp, followed by mapping to a custom database (virus names and accessions in paper supp Table S2) using bowtie2 using 'virus_pipeline_map.sh'. Then, low abundance reads were filtered using 'filter_low_abundance.sh'. The output 'virus_counts_filtered_matrix.csv' was then manually edited to:
+
 -  make the accessions the same format as the long read csv
--  add acolumn for virus names
+-  add a column for virus names
 -  add three adddiitonal rows containig total_virus (sum of all virus reads/sample), 'total_trim_reads' (the total number of trimmed reads for each sample - from the fastp reports), and  'total_pair' (total trimmed, paired reads, calculated as 0.5* total_trim_reads)
--  and saved as 'virus_counts_filtered_matrix_edit_3_No_MiMo.csv'.
+  
+and save as 'virus_counts_filtered_matrix_edit_3_No_MiMo.csv'.
 
 
 ### Additional data filtering and generation of plots
