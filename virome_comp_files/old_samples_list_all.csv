@@ -1,0 +1,31 @@
+﻿sample_id,orig_name,location,Varroa_status,management,year,trip,island,collection_date,publication,lib_name,TGAC_alias,notes,data
+V_A_h1,H15_Ow1a,Waimanalo,Varroa,apiary,2015,2015_16,Oahu,24/11/2015,insect_community,,,,yes
+V_A_h2,H15_Bk1a,Kukio,Varroa,apiary,2015,2015_16,BI,21/11/2015,insect_community,,,,yes
+V_A_h3,H15_Opa1,Howard - Party,Varroa,apiary,2015,2015_16,Oahu,24/11/2015,insect_community,,,,yes
+V_A_h4,H15_OPat2,Pat - UH,Varroa,apiary,2016,2015_16,Oahu,17/10/2016,insect_community,,,,yes
+V_W_h1,H15_Ba1a,Amy Greenwell Botanical Garden,Varroa,wild,2015,2015_16,BI,21/11/2015,insect_community,,,,yes
+V_W_h2,H15_Oc3,Coco head,Varroa,wild,2015,2015_16,Oahu,17/11/2015,insect_community,,,,yes
+V_W_h3,H16_OWM1,Waahila Ridge Manoa,Varroa,wild,2016,2015_16,Oahu,07/04/2016,insect_community,,,,yes
+V_W_h4,H16_ORr1,Ridge road,Varroa,wild,2016,2015_16,Oahu,07/04/2016,insect_community,,,,yes
+N_A_h1,H15_Mb1a,Brenda,no_Varroa,apiary,2015,2015_16,Molokai,19/11/2015,insect_community,,,,yes
+N_A_h2,H15_Mb2a,Brenda,no_Varroa,apiary,2015,2015_16,Molokai,19/11/2015,insect_community,,,,yes
+N_A_h3,H16_KCc47,Community college,no_Varroa,apiary,2016,2015_16,Kauai,08/10/2016,insect_community,,,,yes
+N_A_h4,H16_KCc48,Community college,no_Varroa,apiary,2016,2015_16,Kauai,08/10/2016,insect_community,,,,yes
+N_A_h5,H16_KCc49,Community college,no_Varroa,apiary,2016,2015_16,Kauai,08/10/2016,insect_community,,,,yes
+N_A_h6,H16_KDp2,Koloa Dave Paniolo,no_Varroa,apiary,2016,2015_16,Kauai,08/10/2016,insect_community,,,,yes
+N_W_h1,H15_Mu1a,USDA Plant centre,no_Varroa,wild,2015,2015_16,Molokai,19/11/2015,insect_community,,,,yes
+N_W_h2,H16_KCl2,Canyon lookout,no_Varroa,wild,2016,2015_16,Kauai,07/10/2016,insect_community,,,,yes
+HB_S13,21-BIRonbees3,,Varroa,apiary,2012,2012,BI,01/12/2012,apiary_pest_paper,LIB6115_LDI5020,SM2_S13_DeformedWing,,yes
+HB_S67,75-Oahu UH bees 44,,Varroa,apiary,2012,2012,Oahu,07/11/2012,apiary_pest_paper_superinf,LIB6169_LDI5054,SM2_S67_DeformedWing,,yes
+HB_S16,24-BIGarnettbees3,,Varroa,apiary,2012,2012,BI,30/12/2012,apiary_pest_paper,LIB6118_LDI5022,SM2_S16_DeformedWing,,yes
+HB_S17,25-BIKronsbees4,,Varroa,apiary,2012,2012,BI,30/11/2012,apiary_pest_paper_superinf,LIB6119_LDI5023,SM2_S17_DeformedWing,,yes
+HB_S69,UH Waimanalo Hive 12c,,Varroa,apiary,2012,2012,Oahu,07/11/2012,superinf,LIB6171_LDI5055,SM2_S69_DeformedWing,,yes
+HB_S70,Urban Garden Centre/Pearl City Hive 3,,Varroa,apiary,2012,2012,Oahu,07/11/2012,superinf,LIB6172_LDI5056,SM2_S70_DeformedWing,,yes
+HB_S71,Urban Garden Centre/Pearl City Hive 4,,Varroa,apiary,2012,2012,Oahu,07/11/2012,superinf,LIB6173_LDI5057,SM2_S71_DeformedWing,,yes
+HB_S22,30-BISeanbees2,,Varroa,apiary,2012,2012,BI,04/12/2012,superinf,LIB6124_LDI5025,SM2_S22_DeformedWing,,yes
+HB_S21,29-BISeanbees1,,Varroa,apiary,2012,2012,BI,04/12/2012,superinf,LIB6123_LDI5024,SM2_S21_DeformedWing,,yes
+HB_S1,1-20 view apiary-Maui,,no_Varroa,apiary,2012,2012,Maui,20/11/2012,apiary_pest,LIB6103_LDI5013,SM2_S1_DeformedWing,,yes
+HB_S2,2-17 watertank apiary-maui,,no_Varroa,apiary,2012,2012,Maui,19/11/2012,NA,LIB6104_LDI5014,SM2_S2_DeformedWing,,no
+HB_S4,12-2009 oahu bees 7,,Varroa,apiary,2009,2009,Oahu,unk,apiary_pest,LIB6106_LDI5015,SM2_S4_DeformedWing,,no
+HB_S5,13-2009 oahu bees 1,,Varroa,apiary,2009,2009,Oahu,unk,apiary_pest,LIB6107_LDI5016,SM2_S5_DeformedWing,,yes
+HB_S6,14-2009 oahu H8,,Varroa,apiary,2009,2009,Oahu,unk,NA,LIB6108_LDI5017,SM2_S6_DeformedWing,,yes

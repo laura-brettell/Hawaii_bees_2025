@@ -1,0 +1,105 @@
+﻿date collection,island,location,location2,colony id,discription_2,approx_address,lab_sample_number,weight_30_bees,library,barcode,alias,notes,code
+02-Mar-24,oahu,helieva (tadd),haleiwa,190,,,35,,Laura_library2,11,helieva190,,HE1
+02-Mar-24,oahu,helieva (tadd),haleiwa,163,,,36,,NA,NA,NA,cDNA_evaporated,NA
+02-Mar-24,oahu,helieva (tadd),haleiwa,161,,,37,,Laura_library2,13,helieva161,,HE2
+29-Feb-24,oahu,punaluu (tadd),punaluu,1,,,38,,Laura_library2,14,punaluu1,,PU1
+29-Feb-24,oahu,punaluu (tadd),punaluu,2,,,39,,Laura_library2,15,punaluu2,,PU2
+29-Feb-24,oahu,punaluu (tadd),punaluu,3,,,40,,Laura_library2,16,punaluu3,,PU3
+14-Feb-24,oahu,Dennis,Dennis,om3d1,,,41,,Laura_library2,17,Dennisom3d1,,DE1
+14-Feb-24,oahu,Dennis,Dennis,om2b1,,,42,,Laura_library2,18,Dennisom2b1,,DE2
+14-Feb-24,oahu,Dennis,Dennis,omib2,,,,,Clarissa_library,6,OMIB2,,DE3
+21-Feb-24,oahu,Torintinos,Torintinos,1,,,43,,Laura_library2,19,Torintinos1,,TO1
+21-Feb-24,oahu,Torintinos,Torintinos,2,,,44,,Laura_library2,20,Torintinos2,,TO2
+21-Feb-24,oahu,Torintinos,Torintinos,3,,,45,,Laura_library2,21,Torintinos3,,TO3
+21-Feb-24,oahu,Torintinos,Torintinos,Wild,,,46,,Laura_library2,22,TorintinosWild,,TO4
+28-Feb-24,oahu,Waikele (tadd),Waikele,40,,,47,,Laura_library2,23,Waikele40,,WA1
+28-Feb-24,oahu,Waikele (tadd),Waikele,41,,,48,,Laura_library2,24,Waikele41,,WA2
+28-Feb-24,oahu,Waikele (tadd),Waikele,38,,,49,,Laura_library3,1,Waikele38,,WA3
+25-Feb-24,oahu,UH apiary,UH_apiary,W15,,,50,,Laura_library3,2,UH_apiaryW15,,UH1
+25-Feb-24,oahu,UH apiary,UH_apiary,W1,,,51,,Laura_library3,3,UH_apiaryW1,,UH2
+25-Feb-24,oahu,UH apiary,UH_apiary,W30,,,52,,Laura_library3,4,UH_apiaryW30,,UH3
+16-Feb-24,oahu,Waminalo (Peters),Waimanalo_P,1,,,53,,Laura_library3,5,Waminalo1,,WM1
+16-Feb-24,oahu,Waminalo (Peters),Waimanalo_P,2,,,54,,Laura_library3,6,Waminalo2,,WM2
+16-Feb-24,oahu,Waminalo (Peters),Waimanalo_P,3,,,,,Clarissa_library,3,Waminalo-3,,WM3
+13-Feb-24,oahu,Kaneohe School,Kaneohe,swarm,,,55,,Laura_library3,7,Kaneohe_Schoolswarm,,KA1
+13-Feb-24,oahu,Kualoa,Kualoa,P15,,,56,,Laura_library3,8,KualoaP15,,KU1
+13-Feb-24,oahu,Kualoa,Kualoa,P2,,,57,,Laura_library3,9,KualoaP2,,KU2
+13-Feb-24,oahu,Kualoa,Kualoa,Cow-P,,,58,,Laura_library3,10,KualoaCow-P,,KU3
+10-Feb-24,oahu,Wainnae,Wainnae,Jon-2,,,59,,Laura_library3,11,WainnaeJon-2,,WN1
+10-Feb-24,oahu,Wainnae,Wainnae,Jon-3,,,60,,Laura_library3,12,WainnaeJon-3,,WN2
+10-Mar-24,oahu,Kim,Kim,1,,,,,Clarissa_library,1,Kim-1,,KI1
+10-Mar-24,oahu,Kim,Kim,2,,,61,,Laura_library3,13,Kim2,,KI2
+10-Mar-24,oahu,Kim,Kim,3,,,62,,Laura_library3,14,Kim3,,KI3
+11-Mar-24,oahu,Pat Univ,Pat,1,,,63,,Laura_library3,15,Pat_Univ1,,PA1
+11-Mar-24,oahu,Pat Univ,Pat,2,,,64,,Laura_library3,16,Pat_Univ2,,PA2
+11-Mar-24,oahu,Pat Univ,Pat,3,,,65,,Laura_library3,17,Pat_Univ3,,PA3
+27-Feb-24,oahu,Kaites  North shore,Katie,Jenny,,,,,Clarissa_library,8,Kaites-Jenny,,KT1
+27-Feb-24,oahu,Kaites  North shore,Katie,issac,,,66,,Laura_library3,18,Kaites__North_shoreissac,,KT2
+27-Feb-24,oahu,Kaites  North shore,Katie,stacys,,,67,,Laura_library3,19,Kaites__North_shorestacys,,KT3
+19-Feb-24,big island,VHS (D. Thomas),VSH,1,,,68,,Laura_library3,20,VHS1,,VS1
+19-Feb-24,big island,VHS (D. Thomas),VSH,2,,,69,,Laura_library3,21,VHS2,,VS2
+19-Feb-24,big island,VHS (D. Thomas),VSH,3,,,70,,Laura_library3,22,VHS3,,VS3
+19-Feb-24,big island,VHS (D. Thomas),VSH,4,,,,,Clarissa_library,5,VHS-4,,VS4
+19-Feb-24,big island,VHS (D. Thomas),VSH,5,,,71,,Laura_library3,23,VHS5,,VS5
+19-Feb-24,big island,Garnets Hilo,Garnets,1,,,72,,Laura_library3,24,Garnets_Hilo1,,GA1
+19-Feb-24,big island,Garnets Hilo,Garnets,2,,,73,,Laura_library4,1,Garnets_Hilo2,,GA2
+19-Feb-24,big island,Garnets Hilo,Garnets,3,,,74,,Laura_library4,2,Garnets_Hilo3,,GA3
+19-Feb-24,big island,Garnets Hilo,Garnets,4,,,,,Clarissa_library,4,Garnets-4,,GA4
+19-Feb-24,big island,Garnets Hilo,Garnets,5,,,75,,Laura_library4,3,Garnets_Hilo5,,GA5
+20-Feb-24,big island,Pahala (garnets),Pahala,1,,,76,,Laura_library4,4,Pahala1,,PH1
+20-Feb-24,big island,Pahala (garnets),Pahala,2,,,77,,Laura_library4,5,Pahala2,,PH2
+20-Feb-24,big island,Pahala (garnets),Pahala,3,,,78,,Laura_library4,6,Pahala3,,PH3
+20-Feb-24,big island,Pahala (garnets),Pahala,4,,,,,Clarissa_library,7,Pahala-4,,PH4
+20-Feb-24,big island,Pahala (garnets),Pahala,5,,,79,,Laura_library4,7,Pahala5,,PH5
+20-Feb-24,big island,Volcano,Volcano,1,,,80,,Laura_library4,8,Volcano1,,VO1
+20-Feb-24,big island,Volcano,Volcano,2,,,81,,Laura_library4,9,Volcano2,,VO2
+20-Feb-24,big island,Volcano,Volcano,3,,,82,,Laura_library4,10,Volcano3,,VO3
+20-Feb-24,big island,Volcano,Volcano,4,,,83,,Laura_library4,11,Volcano4,,VO4
+20-Feb-24,big island,Volcano,Volcano,5,,,84,,Laura_library4,12,Volcano5,,VO5
+20-Feb-24,big island,Panaewa(Stacy Hilo),Panaewa,1,,,,,Clarissa_library,2,Panaewa-1,,PE1
+20-Feb-24,big island,Panaewa(Stacy Hilo),Panaewa,2,,,85,,Laura_library4,13,Panaewa2,,PE2
+20-Feb-24,big island,Panaewa(Stacy Hilo),Panaewa,3,,,86,,Laura_library4,14,Panaewa3,,PE3
+20-Feb-24,big island,Panaewa(Stacy Hilo),Panaewa,4,,,,,NA,NA,na,missing sample,NA
+20-Feb-24,big island,Panaewa(Stacy Hilo),Panaewa,5,,,,,NA,NA,na,missing sample,NA
+22-Jan-25,Kauai,Lihue,Lihue,K-A1,Airport feral,"3144 Ninini Point St, Lihue, HI 96766",1,uknown (weighed 50 then removed 20 bees),Laura_library1,1,LihueK-A1,,LI1
+22-Jan-25,Kauai,Lihue,Lihue,K-A2,Airport feral,"3144 Ninini Point St, Lihue, HI 96766",2,uknown (weighed 50 then removed 20 bees),Laura_library1,2,LihueK-A2,,LI2
+22-Jan-25,Kauai,Kalaheo,Kalaheo,K-B1,Robin Fisher,"approx 21.910262, -159.532861 Kauai County, Hawaii 96741",3,uknown (weighed 50 then removed 20 bees),Laura_library1,3,KalaheoK-B1,,KL1
+22-Jan-25,Kauai,Kalaheo,Kalaheo,K-B2,Robin Fisher,"approx 21.910262, -159.532861 Kauai County, Hawaii 96741",4,uknown (weighed 50 then removed 20 bees),Laura_library1,4,KalaheoK-B2,,KL2
+22-Jan-25,Kauai,Kalaheo,Kalaheo,K-B3,Robin Fisher,"approx 21.910262, -159.532861 Kauai County, Hawaii 96741",5,uknown (weighed 50 then removed 20 bees),Laura_library1,5,KalaheoK-B3,,KL3
+22-Jan-25,Kauai,Kalaheo,Kalaheo,K-B4,Robin Fisher,"approx 21.910262, -159.532861 Kauai County, Hawaii 96741",6,uknown (weighed 50 then removed 20 bees),Laura_library1,6,KalaheoK-B4,,KL4
+22-Jan-25,Kauai,Poipu,Poipu,K-C1,,"2835 Poipu Rd, Koloa, HI 96756",7,uknown (weighed 50 then removed 20 bees),Laura_library1,7,PoipuK-C1,,PO1
+22-Jan-25,Kauai,Poipu,Poipu,K-C2,,"2835 Poipu Rd, Koloa, HI 96756",8,uknown (weighed 50 then removed 20 bees),Laura_library1,8,PoipuK-C2,,PO2
+22-Jan-25,Kauai,Kauai community college,KCC,K-D1,,"3-1901 Kaumualii Hwy, Lihue, HI 96766",9,3.966,Laura_library1,9,Kauai_community_collegeK-D1,,KC1
+22-Jan-25,Kauai,Kauai community college,KCC,K-D2,,"3-1901 Kaumualii Hwy, Lihue, HI 96766",10,3.697,Laura_library1,10,Kauai_community_collegeK-D2,,KC2
+22-Jan-25,Kauai,Kauai community college,KCC,K-D3,,"3-1901 Kaumualii Hwy, Lihue, HI 96766",11,3.484,Laura_library1,11,Kauai_community_collegeK-D3,,KC3
+22-Jan-25,Kauai,Kauai community college,KCC,K-D4,,"3-1901 Kaumualii Hwy, Lihue, HI 96766",12,3.269,Laura_library1,12,Kauai_community_collegeK-D4,,KC4
+22-Jan-25,Kauai,Kauai community college,KCC,K-D5,,"3-1901 Kaumualii Hwy, Lihue, HI 96766",13,3.91,Laura_library1,13,Kauai_community_collegeK-D5,,KC5
+22-Jan-25,Kauai,Kauai community college,KCC,K-D6,,"3-1901 Kaumualii Hwy, Lihue, HI 96766",14,3.371,Laura_library1,14,Kauai_community_collegeK-D6,,KC6
+22-Jan-25,Kauai,Kauai community college,KCC,K-D7,,"3-1901 Kaumualii Hwy, Lihue, HI 96766",15,3.62,Laura_library1,15,Kauai_community_collegeK-D7,,KC7
+22-Jan-25,Kauai,Kauai community college,KCC,K-D8,,"3-1901 Kaumualii Hwy, Lihue, HI 96766",16,4.401,Laura_library1,16,Kauai_community_collegeK-D8,,KC8
+22-Jan-25,Kauai,Olohena rd,Olohena_rd,K-E1,colourful boxes,"22.079976, -159.349239 Kauai, Hawaii",17,3.261,Laura_library1,17,Olohena_rdK-E1,,OL1
+22-Jan-25,Kauai,Olohena rd,Olohena_rd,K-E2,colourful boxes,"22.079976, -159.349239 Kauai, Hawaii",18,3.92,Laura_library1,18,Olohena_rdK-E2,,OL2
+22-Jan-25,Kauai,Olohena rd,Olohena_rd,K-E3,colourful boxes,"22.079976, -159.349239 Kauai, Hawaii",19,3.761,Laura_library1,19,Olohena_rdK-E3,,OL3
+22-Jan-25,Kauai,Olohena rd,Olohena_rd,K-E4,colourful boxes,"22.079976, -159.349239 Kauai, Hawaii",20,3.719,Laura_library1,20,Olohena_rdK-E4,,OL4
+22-Jan-25,Kauai,Anahola,Anahola,K-F1,Doug,"22.159753, -159.314792 Anahola, Hawaii 96703",21,3.218,Laura_library1,21,AnaholaK-F1,,AN1
+22-Jan-25,Kauai,Anahola,Anahola,K-F2,Doug,"22.159753, -159.314792 Anahola, Hawaii 96703",22,3.7,Laura_library1,22,AnaholaK-F2,,AN2
+22-Jan-25,Kauai,Anahola,Anahola,K-F3,Doug,"22.159753, -159.314792 Anahola, Hawaii 96703",23,4.199,Laura_library1,23,AnaholaK-F3,,AN3
+22-Jan-25,Kauai,Anahola,Anahola,K-F4,Doug,"22.159753, -159.314792 Anahola, Hawaii 96703",24,3.365,Laura_library1,24,AnaholaK-F4,,AN4
+22-Jan-25,Kauai,Anahola,Anahola,K-F5,Doug,"22.159753, -159.314792 Anahola, Hawaii 96703",25,4.263,Laura_library2,1,AnaholaK-F5,,AN5
+22-Jan-25,Kauai,Anahola,Anahola,K-F6,Doug,"22.159753, -159.314792 Anahola, Hawaii 96703",26,3.999,Laura_library2,2,AnaholaK-F6,,AN6
+22-Jan-25,Kauai,old house,old_house,K-G1,,"4104 Wailapa Rd, Kilauea, HI 96754",27,2.961,Laura_library2,3,old_houseK-G1,,OH1
+22-Jan-25,Kauai,Hanalei spirits,Hanalei_spirits,K-H1,,"4241 Kahili Makai St, Kilauea, HI 96754",28,4.106,Laura_library2,4,Hanalei_spiritsK-H1,,HA1
+22-Jan-25,Kauai,Hanalei spirits,Hanalei_spirits,K-H2,,"4241 Kahili Makai St, Kilauea, HI 96754",29,4.067,Laura_library2,5,Hanalei_spiritsK-H2,,HA2
+22-Jan-25,Kauai,Hanalei spirits,Hanalei_spirits,K-H3,,"4241 Kahili Makai St, Kilauea, HI 96754",30,4.19,Laura_library2,6,Hanalei_spiritsK-H3,,HA3
+22-Jan-25,Kauai,Hanalei spirits,Hanalei_spirits,K-H4,,"4241 Kahili Makai St, Kilauea, HI 96754",31,3.618,Laura_library2,7,Hanalei_spiritsK-H4,,HA4
+22-Jan-25,Kauai,Mac nuts,Mac_nuts,K-I1,slim,"52988 Kuhio Hwy, Kilauea, HI 96754",32,4.316,Laura_library2,8,Mac_nutsK-I1,,MA1
+22-Jan-25,Kauai,Mac nuts,Mac_nuts,K-I2,slim,"52988 Kuhio Hwy, Kilauea, HI 96754",33,3.606,Laura_library2,9,Mac_nutsK-I2,,MA2
+22-Jan-25,Kauai,Mac nuts,Mac_nuts,K-I3,slim,"52988 Kuhio Hwy, Kilauea, HI 96754",34,3.735,Laura_library2,10,Mac_nutsK-I3,,MA3
+unk,Jamaica,,Jamaica_E,17,EHB,,87,,Laura_library4,15,EHB17,,NA
+unk,Jamaica,,Jamaica_A,42,AHB,,88,,Laura_library4,16,AHB42,,NA
+unk,Jamaica,,Jamaica_A,32,AHB,,89,,Laura_library4,17,AHB32,,NA
+unk,Jamaica,,Jamaica_A,40,AHB,,90,,Laura_library4,18,AHB40,,NA
+unk,Jamaica,,Jamaica_A,22,AHB,,91,,Laura_library4,19,AHB22,,NA
+unk,Jamaica,,Jamaica_E,24,EHB,,92,,Laura_library4,20,EHB24,,NA
+unk,Jamaica,,Jamaica_E,2,EHB,,93,,Laura_library4,21,EHB2,,NA
+unk,Jamaica,,Jamaica_E,44,EHB,,94,,Laura_library4,22,EHB44,,NA
