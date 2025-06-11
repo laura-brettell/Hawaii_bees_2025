@@ -29,6 +29,8 @@ To organise and filter the data and generate the virome composition plots, use t
 
 ## DWV recombination
 
+
+
 ### generate DWV assemblies
 
 Firstly, the 2024-35 data.
@@ -72,6 +74,14 @@ useGrid=false  /
 Next, the long read data.....
 
 
+### generate coverage plots
+
+Show coverage of reads to DWV-A and DWV-B ref genomes
+
+Use the script 'Hawaii_dwv_recomb_all.Rmd' - this takes bam files from epi2me for the LR data, and those bam files for the short read data generated above.
+
+
+### make recombination breakpoints diagram
 
 
 
