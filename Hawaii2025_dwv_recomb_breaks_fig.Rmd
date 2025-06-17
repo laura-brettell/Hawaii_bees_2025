@@ -1,0 +1,414 @@
+---
+title: "Hawaii2025_dwv_recomb_breaks_fig"
+author: "Laura"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Project
+
+Here I am exploring the data from Oxford Nanopore seq data from pooled bee samples collected from Hawaii in 2024/2025, we are looking at the viral lanscape, particularly DWV in Hawaii 15 years after our first study.
+
+Here i am making a figure to visualise the variety of recombinants identified by the coverage data
+
+
+
+### install packages
+
+```{r, warning=FALSE}
+
+#library(rtracklayer) # for extracting features from gff file
+library(dplyr)
+library(ggplot2)
+#install.packages("gggenes")
+library(gggenes)
+
+```
+
+
+
+First, the genome.
+Actually, this is not v useful, the breakpoints for the actual genes aren't here, only the CDS but that actually looks wrong, so instead manually make a dataframe with the info
+
+```{r}
+# Import the GFF
+#gff <- import("./DWV_genomic.gff")
+
+#gff_df <- as.data.frame(gff)
+
+# See what the columns look like
+#colnames(gff_df)
+
+# Filter only relevant gene features
+#gff_df <- as.data.frame(gff) %>%
+ # filter(type == "type") %>%
+#  select(seqnames, start, end, ID, type = type) %>%
+#  mutate(molecule = "Parental")
+
+# 
+
+
+```
+
+
+bring in recombinants csv
+
+```{r}
+
+recombinant_df <- read.csv("recomb_breakpoints_2.csv")
+
+recomb_df_O <- recombinant_df %>%
+  filter(island == "Oahu")
+
+recomb_df_BI <- recombinant_df %>%
+  filter(island == "Big_Island")
+
+ref_genome <- recombinant_df %>%
+  filter(genome == "DWV_A")
+
+
+```
+
+
+
+set colours
+
+```{r}
+
+colours <- c(
+  "5'_UTR" = "white",
+  "Lp" = "#D9913D",
+  "VP3" = "#EDAE49",
+  "VP4" = "#FFE2AD",
+  "VP1" = "#A5691F",
+  "VP2" = "#C47F2E",
+  "unk1" = "#F4C166",
+  "Hel" = "#4BB0A3",
+  "unk2" = "#A3D9D1", 
+  "VPg" = "#14564D",
+  "3C_pro__RdRp" = "#70C4B7",
+  "3'_UTR" = "white",
+  "DWV_A" = "#d62828",
+  "DWV_B" = "#064789",
+  "stripe" = "#701E58"
+)
+  
+ 
+
+```
+
+
+
+original
+
+```{r}
+
+
+recombinant_df$genome <- factor(recombinant_df$genome, levels = rev(c("DWV_A", "DE1", "GA1")))
+
+plot1 <- ggplot(recombinant_df, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+  scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = NULL, x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none",
+    plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+plot1
+
+
+
+
+```
+
+new
+
+## first BIg Island
+
+```{r}
+
+recomb_df_BI_2012 <- recomb_df_BI %>%
+  filter(year == "2012")
+
+recomb_df_BI_2015 <- recomb_df_BI %>%
+  filter(year == "2015")
+
+recomb_df_BI_2024 <- recomb_df_BI %>%
+  filter(year == "2024")
+
+#recombinant_df$genome <- factor(recombinant_df$genome, levels = rev(c("DWV_A", "DE1", "GA1")))
+
+plot_BI_2012 <- ggplot(recomb_df_BI_2012, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = "2012", x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+# plot_BI_2012
+# 6x genomes
+
+plot_BI_2015 <- ggplot(recomb_df_BI_2015, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = "2015", x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+# plot_BI_2015
+# 2x genomes
+
+
+plot_BI_2024 <- ggplot(recomb_df_BI_2024, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = "2024", x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+# plot_BI_2024
+# 6x genomes
+
+
+# adn the ref genome
+
+plot_ref <- ggplot(ref_genome, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = NULL, x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+plot_ref
+
+```
+
+
+
+## Next Oahu
+
+```{r}
+
+recomb_df_O_2009 <- recomb_df_O %>%
+  filter(year == "2009")
+
+recomb_df_O_2012 <- recomb_df_O %>%
+  filter(year == "2012")
+
+recomb_df_O_2015 <- recomb_df_O %>%
+  filter(year == "2015")
+
+recomb_df_O_2016 <- recomb_df_O %>%
+  filter(year == "2016")
+
+recomb_df_O_2024 <- recomb_df_O %>%
+  filter(year == "2024")
+
+#recombinant_df$genome <- factor(recombinant_df$genome, levels = rev(c("DWV_A", "DE1", "GA1")))
+
+plot_O_2009 <- ggplot(recomb_df_O_2009, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = "2009", x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+
+# plot_O_2009
+# 4x genomes
+
+
+plot_O_2012 <- ggplot(recomb_df_O_2012, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = "2012", x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+# plot_O_2012
+# 7x genomes
+
+plot_O_2015 <- ggplot(recomb_df_O_2015, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = "2015", x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+# plot_O_2015
+# 4x genomes
+
+plot_O_2016 <- ggplot(recomb_df_O_2016, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = "2016", x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+# plot_O_2016
+# 3x genomes
+
+
+
+
+plot_O_2024 <- ggplot(recomb_df_O_2024, aes(xmin = start, xmax = end, y = genome, fill = fill_col, label = label)) +
+  geom_gene_arrow(
+    arrowhead_height = unit(0, "cm"),
+    arrowhead_width = unit(0, "cm"),
+    arrow_body_height = unit(0.4, "cm")
+  ) +
+  geom_gene_label(align = "left") +
+ # scale_y_discrete(expand = expansion(mult = c(0.05, 0.05))) +  # Reduce space above/below
+  theme_minimal() +
+  scale_fill_manual(values = colours) +
+  labs(title = "2024", x = "nucleotide position", y = "") +
+  theme(
+    legend.position = "none"#,
+ #   plot.margin = margin(t = 5, r = 5, b = 5, l = 5),          # Tighter overall margins
+#    panel.spacing.y = unit(0.1, "lines")                      # Reduce vertical padding
+  ) 
+
+# plot_O_2024
+# 18x genomes
+
+
+
+```
+
+
+playing round with saving to get sizes approporiate for cobining in illustrator
+
+```{r}
+
+#ggsave("16Jun_2024_oahu_recomb.pdf", plot = plot_O_2024, width = 4, height = 4.5)
+#ggsave("16Jun_2009_oahu_recomb.pdf", plot = plot_O_2009, width = 4, height = 1.6)
+#ggsave("16Jun_2012_oahu_recomb.pdf", plot = plot_O_2012, width = 4, height = 2.2)
+#ggsave("16Jun_2015_oahu_recomb.pdf", plot = plot_O_2015, width = 4, height = 1.6)
+#ggsave("16Jun_2016_oahu_recomb.pdf", plot = plot_O_2016, width = 4, height = 1.5)
+
+#ggsave("16Jun_2024_ref_genome_org.pdf", plot = plot_ref, width = 4, height = 1)
+
+
+#ggsave("16Jun_2024_BI_recomb.pdf", plot = plot_BI_2024, width = 4, height = 2)
+#ggsave("16Jun_2012_BI_recomb.pdf", plot = plot_BI_2012, width = 4, height = 2)
+#ggsave("16Jun_2015_BI_recomb.pdf", plot = plot_BI_2015, width = 4, height = 1.2)
+
+
+
+```
+
+
+
+
+
+```{r}
+
+
+
+
+```
+
+
+
+
+
+```{r}
+
+
+
+```
+
+
