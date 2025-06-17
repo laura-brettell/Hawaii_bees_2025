@@ -78,12 +78,12 @@ Next, the long read data.....
 
 Show coverage of reads to DWV-A and DWV-B ref genomes
 
-Use the script 'Hawaii_dwv_recomb_all.Rmd' - this takes bam files from epi2me for the LR data, and those bam files for the short read data generated above.
+Use the script 'Hawaii_dwv_recomb_all_2.Rmd' - this takes bam files from epi2me for the LR data, and those bam files for the short read data generated above. It also caluculates for each sample the dominant variant every 50bp, then when there is a switch (indicative of a recombinant) it records the position into a dataframe and indicates the points on the plots
 
 
 ### make recombination breakpoints diagram
 
-
+Use the script 'Hawaii2025_dwv_recom_breaks_fig.Rmd'to create schematics of DWV genome organisation for DWV-positive samples with full length coverage. This takes the spreadsheet 'recomb_breakpoints_2.csv' - created with the breakpoints calculated in the previous script, with additional breakpoints manually estimates and curated from the cov plots as well as geneious data. 
 
 
 
