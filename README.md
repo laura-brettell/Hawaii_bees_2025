@@ -71,7 +71,38 @@ useGrid=false  /
 
 ```
 
-Next, the long read data.....
+Next, the older, short read data...
+
+
+1. Extract DWV data in bam format (remember even though it is not explicitly called, this needs bam.bai files to also be in the folder) from the bowtie mapping eg
+
+```
+/usr/bin/samtools view -b ./mapping_results/bams/bams_2009/HB_S5.sorted.bam "NC_004830.2" "NC_006494.1" > ./DWV_reads/DWV_reads_2009/HB_S5_DWV_reads.bam
+```
+
+2. sort the bams, eg
+
+```
+/usr/bin/samtools view -b ./mapping_results/bams/bams_2009/HB_S6.sorted.bam "NC_004830.2" "NC_006494.1" > ./DWV_reads/DWV_reads_2009/HB_S6_DWV_reads.bam
+```
+
+3. Sorted bam to paired fastq, eg
+
+```
+/usr/bin/bedtools bamtofastq -i ./DWV_reads/DWV_reads_2012/HB_S17_DWV_reads_sorted.bam -fq ./DWV_reads/DWV_reads_2012/HB_S17_DWV_reads_R1.fastq -fq2 ./DWV_reads/DWV_reads_2012/HB_S17_DWV_reads_R2.fastq
+```
+
+4. assembly with SPAdes v3.12.0, eg
+
+```
+/usr/bin/spades.py -1 ./DWV_reads/DWV_reads_2012/HB_S17_DWV_reads_R1.fastq -2 ./DWV_reads/DWV_reads_2012/HB_S17_DWV_reads_R2.fastq -o ./DWV_assemblies/2012_assemblies/HB_S17_DWV_assembly
+```
+
+Then, import contigs to Geneious Prime, as well as individual reads, and inspect contigs and reads that span putative recombination breakpoints.
+
+ 
+
+
 
 
 ### generate coverage plots
