@@ -1,7 +1,7 @@
 # Hawaii_bees_2025
 This is a project looking at virome composition, deformed wing virus prevalence, diversity and recombination 15 years after varroa became established on two Hawaiian islands.
 
-This repository contains the scripts to analyse the data and generate the figures. The data comprises samples collected in 2024/2025 which have used long read sequencing (Oxford Nanopore) and samples collected between 2009 and 2016, which have used short read sequencing (Illumina).
+This repository contains the scripts to analyse the data and generate the figures in the paper draft. The data comprises samples collected in 2024/2025 which have used long read sequencing (Oxford Nanopore) and samples collected between 2009 and 2016, which have used short read sequencing (Illumina).
 
 
 
